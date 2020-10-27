@@ -1,0 +1,1 @@
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="RadiusR_Customer_Setup_Service.CustomerSetupService" CodeBehind="CustomerSetupService.svc.cs" %>
