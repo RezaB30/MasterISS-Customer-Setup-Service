@@ -20,6 +20,7 @@ using RadiusR.DB.Enums.CustomerSetup;
 using RadiusR.PDFForms;
 using RadiusR.DB.DomainsCache;
 using RadiusR.DB.ModelExtentions;
+using RadiusR.FileManagement;
 
 namespace RadiusR_Customer_Setup_Service
 {
@@ -423,7 +424,13 @@ namespace RadiusR_Customer_Setup_Service
                     using (Stream fileStream = new MemoryStream())
                     {
                         FileConverter.WriteToStream(fileStream, request.FileData);
-                        FileManager.SaveClientAttachment(fileStream, task.SubscriptionID, request.FileType.ToLower());
+                        var fileManager = new MasterISSFileManager();
+                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(fileStream, ClientAttachmentTypes.Others, request.FileType.ToLower()));
+                        if (result.InternalException != null)
+                        {
+                            _logger.LogException(request.Username, result.InternalException);
+                            return CommonResponse.InternalServerErrorResponse<BasicResponse>(request.Culture);
+                        }
                     }
 
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo, "Added attachment.");
