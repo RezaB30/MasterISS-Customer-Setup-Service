@@ -129,28 +129,23 @@
       <HintPath>..\packages\RadiusR.DB.DomainsCache.1.0.0\lib\net452\RadiusR.DB.DomainsCache.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RadiusR.DB.Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RadiusR.DB.Utilities.1.0.0\lib\net452\RadiusR.DB.Utilities.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="RadiusR.DB.Utilities, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RadiusR.DB.Utilities.1.0.1\lib\net452\RadiusR.DB.Utilities.dll</HintPath>
     </Reference>
-    <Reference Include="RadiusR.FileManagement, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RadiusR.FileManagement.1.0.0\lib\net472\RadiusR.FileManagement.dll</HintPath>
+    <Reference Include="RadiusR.FileManagement, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RadiusR.FileManagement.1.0.1\lib\net472\RadiusR.FileManagement.dll</HintPath>
     </Reference>
-    <Reference Include="RadiusR.Files, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RadiusR.Files.1.0.0\lib\net452\RadiusR.Files.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="RadiusR.Files, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RadiusR.Files.1.0.1\lib\net452\RadiusR.Files.dll</HintPath>
     </Reference>
-    <Reference Include="RadiusR.Localization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RadiusR.Localization.1.0.0\lib\net452\RadiusR.Localization.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="RadiusR.Localization, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RadiusR.Localization.1.0.2\lib\net452\RadiusR.Localization.dll</HintPath>
     </Reference>
-    <Reference Include="RadiusR.Localization.Lists, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RadiusR.Localization.Lists.1.0.0\lib\net452\RadiusR.Localization.Lists.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="RadiusR.Localization.Lists, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RadiusR.Localization.Lists.1.0.3\lib\net452\RadiusR.Localization.Lists.dll</HintPath>
     </Reference>
-    <Reference Include="RadiusR.PDFForms, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RadiusR.PDFForms.1.0.0\lib\net452\RadiusR.PDFForms.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="RadiusR.PDFForms, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RadiusR.PDFForms.1.0.1\lib\net472\RadiusR.PDFForms.dll</HintPath>
     </Reference>
     <Reference Include="RadiusR.Scheduler.SMS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RadiusR.Scheduler.SMS.1.0.0\lib\net452\RadiusR.Scheduler.SMS.dll</HintPath>
@@ -188,9 +183,8 @@
       <HintPath>..\packages\RezaB.TurkTelekom.WebServices.1.0.0\lib\net452\RezaB.TurkTelekom.WebServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RezaB.Web, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RezaB.Web.1.0.0\lib\net452\RezaB.Web.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="RezaB.Web, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RezaB.Web.1.0.1\lib\net452\RezaB.Web.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data.DataSetExtensions" />

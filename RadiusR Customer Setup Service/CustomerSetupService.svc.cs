@@ -421,11 +421,11 @@ namespace RadiusR_Customer_Setup_Service
                         return CommonResponse.InvalidFileSizeResponse<BasicResponse>(request.Culture);
                     }
 
-                    using (Stream fileStream = new MemoryStream())
+                    using (Stream tempStream = new MemoryStream())
                     {
-                        FileConverter.WriteToStream(fileStream, request.FileData);
+                        FileConverter.WriteToStream(tempStream, request.FileData);
                         var fileManager = new MasterISSFileManager();
-                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(fileStream, ClientAttachmentTypes.Others, request.FileType.ToLower()));
+                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(tempStream, ClientAttachmentTypes.Others, request.FileType.ToLower()));
                         if (result.InternalException != null)
                         {
                             _logger.LogException(request.Username, result.InternalException);
@@ -473,7 +473,7 @@ namespace RadiusR_Customer_Setup_Service
                         {
                             ErrorCode = (int)ErrorCodes.Success,
                             FileName = task.Subscription.SubscriberNo + "_Contract.pdf",
-                            FileCode = FileConverter.GetFileCode(fileStream)
+                            FileCode = FileConverter.GetFileCode(fileStream.Result)
                         };
                     }
                 }
