@@ -12,10 +12,9 @@ using RadiusR.DB;
 using RadiusR_Customer_Setup_Service.Enums;
 using RadiusR_Customer_Setup_Service.ContractObjects;
 using System.Data.Entity;
-using RadiusR.Services.NLog;
+using RezaB.API.WebService.NLogExtentions;
 using RezaB.TurkTelekom.WebServices.TTOYS;
 using System.IO;
-using RadiusR.Files;
 using RadiusR.DB.Enums.CustomerSetup;
 using RadiusR.PDFForms;
 using RadiusR.DB.DomainsCache;
@@ -29,7 +28,8 @@ namespace RadiusR_Customer_Setup_Service
     [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any)]
     public class CustomerSetupService : ICustomerSetupService
     {
-        private WebServiceLogger _logger = new WebServiceLogger("main");
+        private static readonly WebServiceLogger _logger = new WebServiceLogger("main");
+        private static readonly WebServiceLogger _messageLogger = new WebServiceLogger("MessageTrace");
 
         public string GetKeyFragment(string username)
         {
@@ -40,7 +40,7 @@ namespace RadiusR_Customer_Setup_Service
         {
             try
             {
-                _logger.LogIncomingMessage(request);
+                _messageLogger.LogIncomingMessage(request);
 
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
@@ -117,7 +117,7 @@ namespace RadiusR_Customer_Setup_Service
         {
             try
             {
-                _logger.LogIncomingMessage(request);
+                _messageLogger.LogIncomingMessage(request);
 
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
@@ -156,7 +156,7 @@ namespace RadiusR_Customer_Setup_Service
         {
             try
             {
-                _logger.LogIncomingMessage(request);
+                _messageLogger.LogIncomingMessage(request);
 
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
@@ -213,7 +213,7 @@ namespace RadiusR_Customer_Setup_Service
         {
             try
             {
-                _logger.LogIncomingMessage(request);
+                _messageLogger.LogIncomingMessage(request);
 
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
@@ -266,7 +266,7 @@ namespace RadiusR_Customer_Setup_Service
         {
             try
             {
-                _logger.LogIncomingMessage(request);
+                _messageLogger.LogIncomingMessage(request);
 
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
@@ -341,7 +341,7 @@ namespace RadiusR_Customer_Setup_Service
         {
             try
             {
-                _logger.LogIncomingMessage(request);
+                _messageLogger.LogIncomingMessage(request);
 
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
@@ -394,7 +394,7 @@ namespace RadiusR_Customer_Setup_Service
         {
             try
             {
-                _logger.LogIncomingMessage(request);
+                _messageLogger.LogIncomingMessage(request);
 
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
@@ -451,7 +451,7 @@ namespace RadiusR_Customer_Setup_Service
         {
             try
             {
-                _logger.LogIncomingMessage(request);
+                _messageLogger.LogIncomingMessage(request);
 
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
