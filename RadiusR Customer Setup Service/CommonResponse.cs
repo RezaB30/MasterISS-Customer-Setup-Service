@@ -1,144 +1,210 @@
 ﻿using RadiusR_Customer_Setup_Service.Enums;
 using RadiusR_Customer_Setup_Service.Responses;
+using RezaB.API.WebService;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Web;
 
 namespace RadiusR_Customer_Setup_Service
 {
     public static class CommonResponse
     {
-        public static T UnauthorizedResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T UnauthorizedResponse<T>(BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.AuthenticationFailed;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("AuthenticationFailed", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(string.Empty, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.AuthenticationFailed,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("AuthenticationFailed", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidStartOrEndDateResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidStartOrEndDateResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidStartOrEndDate;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidStartOrEndDate", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidStartOrEndDate,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidStartOrEndDate", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidTimespanResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidTimespanResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidTimespan;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidTimespan", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidTimespan,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidTimespan", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidTaskStatusResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidTaskStatusResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidTaskStatus;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidTaskStatus", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidTaskStatus,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidTaskStatus", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InternalServerErrorResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InternalServerErrorResponse<T>(BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InternalServerError;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InternalServerError", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(string.Empty, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InternalServerError,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InternalServerError", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T TaskNotFoundErrorResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T TaskNotFoundErrorResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.TaskNotFound;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("TaskNotFound", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.TaskNotFound,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("TaskNotFound", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T MissingCustomerDataResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T MissingCustomerDataResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.MissingCustomerData;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("MissingCustomerData", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.MissingCustomerData,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("MissingCustomerData", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T ExternalWebServiceErrorResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T ExternalWebServiceErrorResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.ExternalWebServiceError;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("ExternalWebServiceError", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.ExternalWebServiceError,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("ExternalWebServiceError", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidReservationDateResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidReservationDateResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidReservationDate;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidReservationDate", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidReservationDate,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidReservationDate", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidFaultCodeResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidFaultCodeResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidFaultCode;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidFaultCode", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidFaultCode,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidFaultCode", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidTaskNoResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidTaskNoResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidTaskNo;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidTaskNo", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidTaskNo,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidTaskNo", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidTaskTypeResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidTaskTypeResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidTaskType;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidTaskType", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidTaskType,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidTaskType", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T UnchangeableTaskErrorResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T UnchangeableTaskErrorResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.UnchangeableTaskError;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("UnchangeableTaskError", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.UnchangeableTaskError,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("UnchangeableTaskError", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidFileTypeResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidFileTypeResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidFileType;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidFileType", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidFileType,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidFileType", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T InvalidFileSizeResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T InvalidFileSizeResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.InvalidFileSize;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidFileSize", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidFileSize,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidFileSize", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        public static T DescriptionIsTooLongResponse<T>(string culture) where T : CustomerSetupServiceResponseBase, new()
+        public static T DescriptionIsTooLongResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
-            var response = new T();
-            response.ErrorCode = (int)ErrorCodes.DescriptionIsTooLong;
-            response.ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("DescriptionIsTooLong", CreateCulture(culture));
-            return response;
+            var response = new BaseResponse<SHA256>(passwordHash, request);
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.DescriptionIsTooLong,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("DescriptionIsTooLong", CreateCulture(request.Culture))
+            };
+
+            return (T)response;
         }
 
-        private static CultureInfo CreateCulture(string cultureName)
+        public static CultureInfo CreateCulture(string cultureName)
         {
             var currentCulture = CultureInfo.InvariantCulture;
             try

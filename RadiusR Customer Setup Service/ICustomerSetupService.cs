@@ -30,13 +30,13 @@ namespace RadiusR_Customer_Setup_Service
         GetCustomerSessionInfoResponse GetCustomerSessionInfo(TaskNoRequest request);
 
         [OperationContract]
-        BasicResponse AddTaskStatusUpdate(AddTaskStatusUpdateRequest request);
+        ParameterlessResponse AddTaskStatusUpdate(AddTaskStatusUpdateRequest request);
 
         [OperationContract]
-        BasicResponse UpdateClientLocation(UpdateCustomerLocationRequest request);
+        ParameterlessResponse UpdateClientLocation(UpdateCustomerLocationRequest request);
 
         [OperationContract]
-        BasicResponse AddCustomerAttachment(AddCustomerAttachmentRequest request);
+        ParameterlessResponse AddCustomerAttachment(AddCustomerAttachmentRequest request);
 
         [OperationContract]
         GetCustomerContractResponse GetCustomerContract(TaskNoRequest request);

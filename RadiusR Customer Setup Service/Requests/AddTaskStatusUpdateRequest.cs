@@ -1,44 +1,26 @@
-﻿using System;
+﻿using RadiusR_Customer_Setup_Service.Requests.Parameters;
+using RezaB.API.WebService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 
 namespace RadiusR_Customer_Setup_Service.Requests
 {
     [DataContract]
-    public class AddTaskStatusUpdateRequest : CustomerSetupServiceRequestBase
+    public class AddTaskStatusUpdateRequest : BaseRequest<TaskUpdate, SHA256>
     {
-        [DataMember]
-        public override string Culture { get; set; }
-
-        [DataMember]
-        public override string Hash { get; set; }
-
-        [DataMember]
-        public override string Username { get; set; }
-
-        [DataMember]
-        public long TaskNo { get; set; }
-
-        [DataMember]
-        public short FaultCode { get; set; }
-
-        [DataMember]
-        public string ReservationDate { get; set; }
-
-        [DataMember]
-        public string Description { get; set; }
-
-        public DateTime? _ReservationDate
+        public TaskUpdate TaskUpdate
         {
             get
             {
-                return DataBinder.ParseDateTime(ReservationDate);
+                return Data;
             }
             set
             {
-                ReservationDate = DataBinder.GetDateTimeString(value);
+                Data = value;
             }
         }
     }

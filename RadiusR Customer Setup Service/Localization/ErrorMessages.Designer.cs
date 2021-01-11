@@ -187,6 +187,15 @@ namespace RadiusR_Customer_Setup_Service.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Success..
+        /// </summary>
+        public static string Success {
+            get {
+                return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Task not found..
         /// </summary>
         public static string TaskNotFound {

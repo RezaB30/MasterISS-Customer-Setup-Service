@@ -1,24 +1,26 @@
-﻿using System;
+﻿using RezaB.API.WebService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 
 namespace RadiusR_Customer_Setup_Service.Requests
 {
     [DataContract]
-    public class TaskNoRequest : CustomerSetupServiceRequestBase
+    public class TaskNoRequest : BaseRequest<long, SHA256>
     {
-        [DataMember]
-        public override string Culture { get; set; }
-
-        [DataMember]
-        public override string Hash { get; set; }
-
-        [DataMember]
-        public override string Username { get; set; }
-
-        [DataMember]
-        public long TaskNo { get; set; }
+        public long TaskNo
+        {
+            get
+            {
+                return Data;
+            }
+            set
+            {
+                Data = value;
+            }
+        }
     }
 }

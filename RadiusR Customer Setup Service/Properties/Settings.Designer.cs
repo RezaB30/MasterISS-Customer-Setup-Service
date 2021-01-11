@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RadiusR_Customer_Setup_Hash_Utility.Properties {
+namespace RadiusR_Customer_Setup_Service.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -20,6 +20,15 @@ namespace RadiusR_Customer_Setup_Hash_Utility.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("04:00:00")]
+        public global::System.TimeSpan CacheDuration {
+            get {
+                return ((global::System.TimeSpan)(this["CacheDuration"]));
             }
         }
     }

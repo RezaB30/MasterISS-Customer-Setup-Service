@@ -10,7 +10,7 @@ using RadiusR_Customer_Setup_Service.Requests;
 using RadiusR_Customer_Setup_Service.Responses;
 using RadiusR.DB;
 using RadiusR_Customer_Setup_Service.Enums;
-using RadiusR_Customer_Setup_Service.ContractObjects;
+using RadiusR_Customer_Setup_Service.Responses.Parameters;
 using System.Data.Entity;
 using RezaB.API.WebService.NLogExtentions;
 using RezaB.TurkTelekom.WebServices.TTOYS;
@@ -20,6 +20,7 @@ using RadiusR.PDFForms;
 using RadiusR.DB.DomainsCache;
 using RadiusR.DB.ModelExtentions;
 using RadiusR.FileManagement;
+using RezaB.API.WebService;
 
 namespace RadiusR_Customer_Setup_Service
 {
@@ -33,7 +34,7 @@ namespace RadiusR_Customer_Setup_Service
 
         public string GetKeyFragment(string username)
         {
-            return KeyManager.GenerateKey(username);
+            return KeyManager.GenerateKeyFragment(username, Properties.Settings.Default.CacheDuration);
         }
 
         public GetTaskListResponse GetTaskList(GetTaskListRequest request)
@@ -45,19 +46,19 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<GetTaskListResponse>(request.Culture);
+                    return CommonResponse.UnauthorizedResponse<GetTaskListResponse>(request);
                 }
-                if (request._startDate == null || request._endDate == null)
+                if (request.DateSpan.StartDateParsed == null || request.DateSpan.EndDateParsed == null)
                 {
-                    return CommonResponse.InvalidStartOrEndDateResponse<GetTaskListResponse>(request.Culture);
+                    return CommonResponse.InvalidStartOrEndDateResponse<GetTaskListResponse>(user.PasswordHash, request);
                 }
-                if (request._endDate - request._startDate > TimeSpan.FromDays(30))
+                if (request.DateSpan.EndDateParsed - request.DateSpan.StartDateParsed > TimeSpan.FromDays(30))
                 {
-                    return CommonResponse.InvalidTimespanResponse<GetTaskListResponse>(request.Culture);
+                    return CommonResponse.InvalidTimespanResponse<GetTaskListResponse>(user.PasswordHash, request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
-                    var tasks = db.CustomerSetupTasks.GetUserTasks(user.UserId).Where(task => task.TaskIssueDate >= request._startDate && DbFunctions.TruncateTime(task.TaskIssueDate) <= request._endDate)
+                    var tasks = db.CustomerSetupTasks.GetUserTasks(user.UserId).Where(task => task.TaskIssueDate >= request.DateSpan.StartDateParsed && DbFunctions.TruncateTime(task.TaskIssueDate) <= request.DateSpan.EndDateParsed)
                         .Include(task => task.Subscription.SubscriptionTelekomInfo).Include(task => task.Subscription.Address).Include(task => task.CustomerSetupStatusUpdates).Include(task => task.Subscription.Customer)
                         .Select(task => new
                         {
@@ -99,17 +100,21 @@ namespace RadiusR_Customer_Setup_Service
                     });
 
                     _logger.LogInfo(request.Username, string.Empty);
-                    return new GetTaskListResponse()
+                    return new GetTaskListResponse(user.PasswordHash, request)
                     {
-                        ErrorCode = (int)ErrorCodes.Success,
-                        TaskList = taskList.ToList()
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                        },
+                        SetupTasks = taskList.ToList()
                     };
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<GetTaskListResponse>(request.Culture);
+                return CommonResponse.InternalServerErrorResponse<GetTaskListResponse>(request);
             }
         }
 
@@ -122,33 +127,40 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<GetCustomerCredentialResponse>(request.Culture);
+                    return CommonResponse.UnauthorizedResponse<GetCustomerCredentialResponse>(request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
                     var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.TaskNo);
                     if (task == null)
                     {
-                        return CommonResponse.TaskNotFoundErrorResponse<GetCustomerCredentialResponse>(request.Culture);
+                        return CommonResponse.TaskNotFoundErrorResponse<GetCustomerCredentialResponse>(user.PasswordHash, request);
                     }
                     if (!task.CanBeUpdated())
                     {
-                        return CommonResponse.UnchangeableTaskErrorResponse<GetCustomerCredentialResponse>(request.Culture);
+                        return CommonResponse.UnchangeableTaskErrorResponse<GetCustomerCredentialResponse>(user.PasswordHash, request);
                     }
 
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo);
-                    return new GetCustomerCredentialResponse()
+                    return new GetCustomerCredentialResponse(user.PasswordHash, request)
                     {
-                        ErrorCode = (int)ErrorCodes.Success,
-                        Username = task.Subscription.Username,
-                        Password = task.Subscription.RadiusPassword
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                        },
+                        CustomerCredentials = new CustomerCredentials()
+                        {
+                            Username = task.Subscription.Username,
+                            Password = task.Subscription.RadiusPassword
+                        }
                     };
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<GetCustomerCredentialResponse>(request.Culture);
+                return CommonResponse.InternalServerErrorResponse<GetCustomerCredentialResponse>(request);
             }
         }
 
@@ -161,51 +173,58 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<GetCustomerLineDetailsResponse>(request.Culture);
+                    return CommonResponse.UnauthorizedResponse<GetCustomerLineDetailsResponse>(request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
                     var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.TaskNo);
                     if (task == null)
                     {
-                        return CommonResponse.TaskNotFoundErrorResponse<GetCustomerLineDetailsResponse>(request.Culture);
+                        return CommonResponse.TaskNotFoundErrorResponse<GetCustomerLineDetailsResponse>(user.PasswordHash, request);
                     }
                     if (!task.CanBeUpdated())
                     {
-                        return CommonResponse.UnchangeableTaskErrorResponse<GetCustomerLineDetailsResponse>(request.Culture);
+                        return CommonResponse.UnchangeableTaskErrorResponse<GetCustomerLineDetailsResponse>(user.PasswordHash, request);
                     }
                     var cachedDomain = DomainsCache.GetDomainByID(task.Subscription.DomainID);
                     if (task.Subscription.SubscriptionTelekomInfo == null || cachedDomain.TelekomCredential == null)
                     {
-                        return CommonResponse.MissingCustomerDataResponse<GetCustomerLineDetailsResponse>(request.Culture);
+                        return CommonResponse.MissingCustomerDataResponse<GetCustomerLineDetailsResponse>(user.PasswordHash, request);
                     }
 
                     TTOYSServiceClient externalClient = new TTOYSServiceClient(cachedDomain.TelekomCredential.XDSLWebServiceUsernameInt, cachedDomain.TelekomCredential.XDSLWebServicePassword);
                     var response = externalClient.Check(task.Subscription.SubscriptionTelekomInfo.SubscriptionNo);
                     if (response.InternalException != null)
                     {
-                        return CommonResponse.ExternalWebServiceErrorResponse<GetCustomerLineDetailsResponse>(request.Culture);
+                        return CommonResponse.ExternalWebServiceErrorResponse<GetCustomerLineDetailsResponse>(user.PasswordHash, request);
                     }
 
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo);
-                    return new GetCustomerLineDetailsResponse()
+                    return new GetCustomerLineDetailsResponse(user.PasswordHash, request)
                     {
-                        ErrorCode = (int)ErrorCodes.Success,
-                        XDSLNo = task.Subscription.SubscriptionTelekomInfo.SubscriptionNo,
-                        IsActive = response.Data.OperationStatus == TTOYSServiceClient.OperationStatus.Open,
-                        DownloadNoiseMargin = response.Data.NoiseRateDown,
-                        UploadNoiseMargin = response.Data.NoiseRateUp,
-                        CurrentDownloadSpeed = response.Data.CurrentDown,
-                        CurrentUploadSpeed = response.Data.CurrentUp,
-                        DownloadSpeedCapacity = response.Data.MaxDown,
-                        UploadSpeedCapacity = response.Data.MaxUp
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                        },
+                        CustomerLineDetails = new CustomerLineDetails()
+                        {
+                            XDSLNo = task.Subscription.SubscriptionTelekomInfo.SubscriptionNo,
+                            IsActive = response.Data.OperationStatus == TTOYSServiceClient.OperationStatus.Open,
+                            DownloadNoiseMargin = response.Data.NoiseRateDown,
+                            UploadNoiseMargin = response.Data.NoiseRateUp,
+                            CurrentDownloadSpeed = response.Data.CurrentDown,
+                            CurrentUploadSpeed = response.Data.CurrentUp,
+                            DownloadSpeedCapacity = response.Data.MaxDown,
+                            UploadSpeedCapacity = response.Data.MaxUp
+                        }
                     };
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<GetCustomerLineDetailsResponse>(request.Culture);
+                return CommonResponse.InternalServerErrorResponse<GetCustomerLineDetailsResponse>(request);
             }
         }
 
@@ -218,51 +237,65 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<GetCustomerSessionInfoResponse>(request.Culture);
+                    return CommonResponse.UnauthorizedResponse<GetCustomerSessionInfoResponse>(request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
                     var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.TaskNo);
                     if (task == null)
                     {
-                        return CommonResponse.TaskNotFoundErrorResponse<GetCustomerSessionInfoResponse>(request.Culture);
+                        return CommonResponse.TaskNotFoundErrorResponse<GetCustomerSessionInfoResponse>(user.PasswordHash, request);
                     }
                     if (!task.CanBeUpdated())
                     {
-                        return CommonResponse.UnchangeableTaskErrorResponse<GetCustomerSessionInfoResponse>(request.Culture);
+                        return CommonResponse.UnchangeableTaskErrorResponse<GetCustomerSessionInfoResponse>(user.PasswordHash, request);
                     }
 
                     var firstSession = task.Subscription.RadiusAccountings.OrderBy(ra => ra.StartTime).FirstOrDefault();
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo);
                     if (firstSession == null)
                     {
-                        return new GetCustomerSessionInfoResponse()
+                        return new GetCustomerSessionInfoResponse(user.PasswordHash, request)
                         {
-                            ErrorCode = (int)ErrorCodes.Success,
-                            IsOnline = false
+                            ResponseMessage = new ServiceResponse()
+                            {
+                                ErrorCode = (int)ErrorCodes.Success,
+                                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                            },
+                            CustomerSessionInfo = new CustomerSessionInfo()
+                            {
+                                IsOnline = false
+                            }
                         };
                     }
 
-                    return new GetCustomerSessionInfoResponse()
+                    return new GetCustomerSessionInfoResponse(user.PasswordHash, request)
                     {
-                        ErrorCode = (int)ErrorCodes.Success,
-                        IsOnline = !firstSession.StopTime.HasValue,
-                        NASIPAddress = firstSession.NASIP,
-                        SessionId = firstSession.SessionID,
-                        SessionTime = TimeSpan.FromSeconds(firstSession.SessionTime).ToString(@"dd\.hh\:mm\:ss"),
-                        SessionStart = DataBinder.GetDateTimeString(firstSession.StartTime),
-                        IPAddress = firstSession.RadiusAccountingIPInfo != null ? firstSession.RadiusAccountingIPInfo.RealIP : null
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                        },
+                        CustomerSessionInfo = new CustomerSessionInfo()
+                        {
+                            IsOnline = !firstSession.StopTime.HasValue,
+                            NASIPAddress = firstSession.NASIP,
+                            SessionId = firstSession.SessionID,
+                            SessionTime = TimeSpan.FromSeconds(firstSession.SessionTime).ToString(@"dd\.hh\:mm\:ss"),
+                            SessionStart = DataBinder.GetDateTimeString(firstSession.StartTime),
+                            IPAddress = firstSession.RadiusAccountingIPInfo != null ? firstSession.RadiusAccountingIPInfo.RealIP : null
+                        }
                     };
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<GetCustomerSessionInfoResponse>(request.Culture);
+                return CommonResponse.InternalServerErrorResponse<GetCustomerSessionInfoResponse>(request);
             }
         }
 
-        public BasicResponse AddTaskStatusUpdate(AddTaskStatusUpdateRequest request)
+        public ParameterlessResponse AddTaskStatusUpdate(AddTaskStatusUpdateRequest request)
         {
             try
             {
@@ -271,47 +304,47 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<BasicResponse>(request.Culture);
+                    return CommonResponse.UnauthorizedResponse<ParameterlessResponse>(request);
                 }
-                if (!string.IsNullOrEmpty(request.ReservationDate) && !request._ReservationDate.HasValue)
+                if (!string.IsNullOrEmpty(request.TaskUpdate.ReservationDate) && !request.TaskUpdate.ReservationDateParsed.HasValue)
                 {
-                    return CommonResponse.InvalidReservationDateResponse<BasicResponse>(request.Culture);
+                    return CommonResponse.InvalidReservationDateResponse<ParameterlessResponse>(user.PasswordHash, request);
                 }
-                if (!Enum.IsDefined(typeof(FaultCodes), (int)request.FaultCode))
+                if (!Enum.IsDefined(typeof(FaultCodes), (int)request.TaskUpdate.FaultCode))
                 {
-                    return CommonResponse.InvalidFaultCodeResponse<BasicResponse>(request.Culture);
+                    return CommonResponse.InvalidFaultCodeResponse<ParameterlessResponse>(user.PasswordHash, request);
                 }
-                if (request.Description != null && request.Description.Length > 450)
+                if (request.TaskUpdate.Description != null && request.TaskUpdate.Description.Length > 450)
                 {
-                    return CommonResponse.DescriptionIsTooLongResponse<BasicResponse>(request.Culture);
+                    return CommonResponse.DescriptionIsTooLongResponse<ParameterlessResponse>(user.PasswordHash, request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
-                    var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.TaskNo);
+                    var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.TaskUpdate.TaskNo);
                     if (task == null)
                     {
-                        return CommonResponse.InvalidTaskNoResponse<BasicResponse>(request.Culture);
+                        return CommonResponse.InvalidTaskNoResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
-                    if (!task.CanChangeState((FaultCodes)request.FaultCode))
+                    if (!task.CanChangeState((FaultCodes)request.TaskUpdate.FaultCode))
                     {
-                        return CommonResponse.UnchangeableTaskErrorResponse<BasicResponse>(request.Culture);
+                        return CommonResponse.UnchangeableTaskErrorResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
 
                     var statusUpdate = new CustomerSetupStatusUpdate()
                     {
                         Date = DateTime.Now,
-                        Description = !string.IsNullOrWhiteSpace(request.Description) ? request.Description : null,
-                        FaultCode = request.FaultCode,
-                        ReservationDate = request._ReservationDate
+                        Description = !string.IsNullOrWhiteSpace(request.TaskUpdate.Description) ? request.TaskUpdate.Description : null,
+                        FaultCode = request.TaskUpdate.FaultCode,
+                        ReservationDate = request.TaskUpdate.ReservationDateParsed
                     };
-                    var newTaskStatus = CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.FaultCode);
+                    var newTaskStatus = CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.TaskUpdate.FaultCode);
                     var shouldSendActivationSMS = false;
                     if (newTaskStatus == TaskStatuses.Completed && (short)newTaskStatus != task.TaskStatus)
                     {
                         shouldSendActivationSMS = true;
                         task.Subscription.State = (short)RadiusR.DB.Enums.CustomerState.Active;
                     }
-                    task.TaskStatus = (short)CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.FaultCode);
+                    task.TaskStatus = (short)CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.TaskUpdate.FaultCode);
                     task.CompletionDate = CustomConverter.GetCompletionDate((TaskStatuses)task.TaskStatus);
                     task.CustomerSetupStatusUpdates.Add(statusUpdate);
                     db.SaveChanges();
@@ -324,20 +357,24 @@ namespace RadiusR_Customer_Setup_Service
                     }
 
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo, "Added rendezvous [ID = {0}].", statusUpdate.ID);
-                    return new BasicResponse()
+                    return new ParameterlessResponse(user.PasswordHash, request)
                     {
-                        ErrorCode = (int)ErrorCodes.Success
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                        }
                     };
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<BasicResponse>(request.Culture);
+                return CommonResponse.InternalServerErrorResponse<ParameterlessResponse>(request);
             }
         }
 
-        public BasicResponse UpdateClientLocation(UpdateCustomerLocationRequest request)
+        public ParameterlessResponse UpdateClientLocation(UpdateCustomerLocationRequest request)
         {
             try
             {
@@ -346,51 +383,55 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<BasicResponse>(request.Culture);
+                    return CommonResponse.UnauthorizedResponse<ParameterlessResponse>(request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
-                    var currentTask = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(task => task.ID == request.TaskNo);
+                    var currentTask = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(task => task.ID == request.LocationUpdate.TaskNo);
                     if (currentTask == null)
                     {
-                        return CommonResponse.InvalidTaskNoResponse<BasicResponse>(request.Culture);
+                        return CommonResponse.InvalidTaskNoResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
                     if (!currentTask.CanBeUpdated())
                     {
-                        return CommonResponse.UnchangeableTaskErrorResponse<BasicResponse>(request.Culture);
+                        return CommonResponse.UnchangeableTaskErrorResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
 
                     if (currentTask.Subscription.SubscriptionGPSCoord == null)
                     {
                         currentTask.Subscription.SubscriptionGPSCoord = new SubscriptionGPSCoord()
                         {
-                            Latitude = request.Latitude,
-                            Longitude = request.Longitude
+                            Latitude = request.LocationUpdate.Latitude,
+                            Longitude = request.LocationUpdate.Longitude
                         };
                     }
                     else
                     {
-                        currentTask.Subscription.SubscriptionGPSCoord.Latitude = request.Latitude;
-                        currentTask.Subscription.SubscriptionGPSCoord.Longitude = request.Longitude;
+                        currentTask.Subscription.SubscriptionGPSCoord.Latitude = request.LocationUpdate.Latitude;
+                        currentTask.Subscription.SubscriptionGPSCoord.Longitude = request.LocationUpdate.Longitude;
                     }
 
                     db.SaveChanges();
 
                     _logger.LogInfo(request.Username, currentTask.Subscription.SubscriberNo, "Updated client GPS coords.");
-                    return new BasicResponse()
+                    return new ParameterlessResponse(user.PasswordHash, request)
                     {
-                        ErrorCode = (int)ErrorCodes.Success
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                        }
                     };
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<BasicResponse>(request.Culture);
+                return CommonResponse.InternalServerErrorResponse<ParameterlessResponse>(request);
             }
         }
 
-        public BasicResponse AddCustomerAttachment(AddCustomerAttachmentRequest request)
+        public ParameterlessResponse AddCustomerAttachment(AddCustomerAttachmentRequest request)
         {
             try
             {
@@ -399,51 +440,55 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<BasicResponse>(request.Culture);
+                    return CommonResponse.UnauthorizedResponse<ParameterlessResponse>(request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
-                    var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.TaskNo);
+                    var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.CustomerAttachment.TaskNo);
                     if (task == null)
                     {
-                        return CommonResponse.InvalidTaskNoResponse<BasicResponse>(request.Culture);
+                        return CommonResponse.InvalidTaskNoResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
                     if (!task.CanBeUpdated())
                     {
-                        return CommonResponse.UnchangeableTaskErrorResponse<BasicResponse>(request.Culture);
+                        return CommonResponse.UnchangeableTaskErrorResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
-                    if (!FileConverter.IsFileTypeAcceptable(request.FileType))
+                    if (!FileConverter.IsFileTypeAcceptable(request.CustomerAttachment.FileType))
                     {
-                        return CommonResponse.InvalidFileTypeResponse<BasicResponse>(request.Culture);
+                        return CommonResponse.InvalidFileTypeResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
-                    if (!FileConverter.IsFileSizeAcceptable(request.FileData))
+                    if (!FileConverter.IsFileSizeAcceptable(request.CustomerAttachment.FileData))
                     {
-                        return CommonResponse.InvalidFileSizeResponse<BasicResponse>(request.Culture);
+                        return CommonResponse.InvalidFileSizeResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
 
                     using (Stream tempStream = new MemoryStream())
                     {
-                        FileConverter.WriteToStream(tempStream, request.FileData);
+                        FileConverter.WriteToStream(tempStream, request.CustomerAttachment.FileData);
                         var fileManager = new MasterISSFileManager();
-                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(tempStream, ClientAttachmentTypes.Others, request.FileType.ToLower()));
+                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(tempStream, ClientAttachmentTypes.Others, request.CustomerAttachment.FileType.ToLower()));
                         if (result.InternalException != null)
                         {
                             _logger.LogException(request.Username, result.InternalException);
-                            return CommonResponse.InternalServerErrorResponse<BasicResponse>(request.Culture);
+                            return CommonResponse.InternalServerErrorResponse<ParameterlessResponse>(request);
                         }
                     }
 
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo, "Added attachment.");
-                    return new BasicResponse()
+                    return new ParameterlessResponse(user.PasswordHash, request)
                     {
-                        ErrorCode = (int)ErrorCodes.Success
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                        }
                     };
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<BasicResponse>(request.Culture);
+                return CommonResponse.InternalServerErrorResponse<ParameterlessResponse>(request);
             }
         }
 
@@ -456,24 +501,31 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<GetCustomerContractResponse>(request.Culture);
+                    return CommonResponse.UnauthorizedResponse<GetCustomerContractResponse>(request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
                     var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.TaskNo);
                     if (task == null)
                     {
-                        return CommonResponse.InvalidTaskNoResponse<GetCustomerContractResponse>(request.Culture);
+                        return CommonResponse.InvalidTaskNoResponse<GetCustomerContractResponse>(user.PasswordHash, request);
                     }
                     using (var fileStream = PDFWriter.GetContractPDF(db, task.SubscriptionID, System.Globalization.CultureInfo.CreateSpecificCulture(request.Culture)))
                     {
                         //var fileColde = FileConverter.GetFileCode(fileStream);
                         _logger.LogInfo(request.Username, task.Subscription.SubscriberNo, "Sent client contract.");
-                        return new GetCustomerContractResponse()
+                        return new GetCustomerContractResponse(user.PasswordHash, request)
                         {
-                            ErrorCode = (int)ErrorCodes.Success,
-                            FileName = task.Subscription.SubscriberNo + "_Contract.pdf",
-                            FileCode = FileConverter.GetFileCode(fileStream.Result)
+                            ResponseMessage = new ServiceResponse()
+                            {
+                                ErrorCode = (int)ErrorCodes.Success,
+                                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                            },
+                            CustomerContract = new CustomerContract()
+                            {
+                                FileName = task.Subscription.SubscriberNo + "_Contract.pdf",
+                                FileCode = FileConverter.GetFileCode(fileStream.Result)
+                            }
                         };
                     }
                 }
@@ -481,7 +533,7 @@ namespace RadiusR_Customer_Setup_Service
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<GetCustomerContractResponse>(request.Culture);
+                return CommonResponse.InternalServerErrorResponse<GetCustomerContractResponse>(request);
             }
         }
     }

@@ -6,41 +6,30 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using RezaB.API.WebService;
 
 namespace RadiusR_Customer_Setup_Service.Authentication
 {
     public static class Authenticator
     {
-        public static UserIdentity Authenticate(string username, string hash)
+        public static UserIdentity Authenticate(BaseRequest<SHA256> request)
         {
-            // get user key fragment
-            var keyFragment = KeyManager.GetKey(username);
-            if (keyFragment == null)
-                return null;
             // get user data
             UserIdentity identity;
             string passwordHash;
             using (RadiusREntities db = new RadiusREntities())
             {
-                var user = db.CustomerSetupUsers.FirstOrDefault(u => u.Username == username);
+                var user = db.CustomerSetupUsers.FirstOrDefault(u => u.Username == request.Username);
                 if (user == null || !user.IsEnabled)
                     return null;
-                identity = new UserIdentity(user.Username, user.ID);
+                identity = new UserIdentity(user.Username, user.ID, user.Password);
                 passwordHash = user.Password;
             }
-
-            // calculate hash
-            var algorithm = SHA1.Create();
-            var calculatedHash = string.Join("", algorithm.ComputeHash(Encoding.UTF8.GetBytes(passwordHash + keyFragment)).Select(b => b.ToString("x2")));
-            // compare hashes
-            if (calculatedHash == hash)
+            if (request.HasValidHash(passwordHash, Properties.Settings.Default.CacheDuration))
+            {
                 return identity;
+            }
             return null;
-        }
-
-        public static UserIdentity Authenticate(CustomerSetupServiceRequestBase request)
-        {
-            return Authenticate(request.Username, request.Hash);
         }
     }
 }

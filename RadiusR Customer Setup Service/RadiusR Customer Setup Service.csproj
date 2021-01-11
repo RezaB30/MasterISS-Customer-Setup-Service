@@ -154,6 +154,9 @@
     <Reference Include="Renci.SshNet, Version=2020.0.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
       <HintPath>..\packages\SSH.NET.2020.0.0\lib\net40\Renci.SshNet.dll</HintPath>
     </Reference>
+    <Reference Include="RezaB.API.WebService, Version=1.1.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RezaB.API.WebService.1.1.4\lib\net472\RezaB.API.WebService.dll</HintPath>
+    </Reference>
     <Reference Include="RezaB.API.WebService.NLogExtentions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RezaB.API.WebService.NLogExtentions.1.0.0\lib\net472\RezaB.API.WebService.NLogExtentions.dll</HintPath>
     </Reference>
@@ -181,10 +184,21 @@
     <Reference Include="RezaB.Web, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RezaB.Web.1.0.1\lib\net452\RezaB.Web.dll</HintPath>
     </Reference>
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Serialization.Primitives, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Serialization.Primitives.4.3.0\lib\net46\System.Runtime.Serialization.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -235,10 +249,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authentication\Authenticator.cs" />
-    <Compile Include="Authentication\KeyManager.cs" />
     <Compile Include="Authentication\UserIdentity.cs" />
     <Compile Include="CommonResponse.cs" />
-    <Compile Include="ContractObjects\SetupTask.cs" />
+    <Compile Include="Responses\Parameters\CustomerContract.cs" />
+    <Compile Include="Responses\Parameters\CustomerCredentials.cs" />
+    <Compile Include="Responses\Parameters\CustomerLineDetails.cs" />
+    <Compile Include="Responses\Parameters\CustomerSessionInfo.cs" />
+    <Compile Include="Responses\Parameters\SetupTask.cs" />
     <Compile Include="CustomConverter.cs" />
     <Compile Include="CustomerSetupService.svc.cs">
       <DependentUpon>CustomerSetupService.svc</DependentUpon>
@@ -260,14 +277,21 @@
       <DependentUpon>ErrorMessages.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="Requests\AddCustomerAttachmentRequest.cs" />
     <Compile Include="Requests\AddTaskStatusUpdateRequest.cs" />
     <Compile Include="Requests\GetCustomerCredentialsRequest.cs" />
     <Compile Include="Requests\GetTaskListRequest.cs" />
-    <Compile Include="Requests\CustomerSetupServiceRequestBase.cs" />
+    <Compile Include="Requests\Parameters\CustomerAttachment.cs" />
+    <Compile Include="Requests\Parameters\DateSpan.cs" />
+    <Compile Include="Requests\Parameters\LocationUpdate.cs" />
+    <Compile Include="Requests\Parameters\TaskUpdate.cs" />
     <Compile Include="Requests\UpdateCustomerLocationRequest.cs" />
-    <Compile Include="Responses\BasicResponse.cs" />
-    <Compile Include="Responses\CustomerSetupServiceResponseBase.cs" />
+    <Compile Include="Responses\ParameterlessResponse.cs" />
     <Compile Include="Responses\GetCustomerContractResponse.cs" />
     <Compile Include="Responses\GetCustomerCredentialResponse.cs" />
     <Compile Include="Responses\GetCustomerLineDetailsResponse.cs" />
@@ -276,6 +300,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="ContractObjects\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -288,6 +313,10 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Properties\PublishProfiles\Laptop.pubxml" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

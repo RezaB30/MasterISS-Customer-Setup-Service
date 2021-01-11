@@ -11,10 +11,13 @@ namespace RadiusR_Customer_Setup_Service.Authentication
 
         public int UserId { get; private set; }
 
-        public UserIdentity(string username, int userId)
+        public string PasswordHash { get; private set; }
+
+        public UserIdentity(string username, int userId, string passwordHash)
         {
             Username = username;
             UserId = userId;
+            PasswordHash = passwordHash;
         }
     }
 }

@@ -1,24 +1,30 @@
-﻿using System;
+﻿using RadiusR_Customer_Setup_Service.Responses.Parameters;
+using RezaB.API.WebService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 
 namespace RadiusR_Customer_Setup_Service.Responses
 {
     [DataContract]
-    public class GetCustomerCredentialResponse : CustomerSetupServiceResponseBase
+    public class GetCustomerCredentialResponse : BaseResponse<CustomerCredentials, SHA256>
     {
-        [DataMember]
-        public override int ErrorCode { get; set; }
+        public GetCustomerCredentialResponse(string passwordHash, BaseRequest<SHA256> baseRequest) : base(passwordHash, baseRequest) { }
 
         [DataMember]
-        public override string ErrorMessage { get; set; }
-
-        [DataMember]
-        public string Username { get; set; }
-
-        [DataMember]
-        public string Password { get; set; }
+        public CustomerCredentials CustomerCredentials
+        {
+            get
+            {
+                return Data;
+            }
+            set
+            {
+                Data = value;
+            }
+        }
     }
 }

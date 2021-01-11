@@ -1,42 +1,30 @@
-﻿using System;
+﻿using RadiusR_Customer_Setup_Service.Responses.Parameters;
+using RezaB.API.WebService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Web;
 
 namespace RadiusR_Customer_Setup_Service.Responses
 {
     [DataContract]
-    public class GetCustomerLineDetailsResponse : CustomerSetupServiceResponseBase
+    public class GetCustomerLineDetailsResponse : BaseResponse<CustomerLineDetails, SHA256>
     {
-        [DataMember]
-        public override int ErrorCode { get; set; }
+        public GetCustomerLineDetailsResponse(string passwordHash, BaseRequest<SHA256> baseRequest) : base(passwordHash, baseRequest) { }
 
         [DataMember]
-        public override string ErrorMessage { get; set; }
-
-        [DataMember]
-        public string XDSLNo { get; set; }
-
-        [DataMember]
-        public bool IsActive { get; set; }
-
-        [DataMember]
-        public string DownloadNoiseMargin { get; set; }
-
-        [DataMember]
-        public string UploadNoiseMargin { get; set; }
-
-        [DataMember]
-        public string CurrentDownloadSpeed { get; set; }
-
-        [DataMember]
-        public string CurrentUploadSpeed { get; set; }
-
-        [DataMember]
-        public string DownloadSpeedCapacity { get; set; }
-
-        [DataMember]
-        public string UploadSpeedCapacity { get; set; }
+        public CustomerLineDetails CustomerLineDetails
+        {
+            get
+            {
+                return Data;
+            }
+            set
+            {
+                Data = value;
+            }
+        }
     }
 }

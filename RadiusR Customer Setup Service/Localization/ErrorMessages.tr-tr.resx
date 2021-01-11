@@ -159,6 +159,9 @@
   <data name="MissingCustomerData" xml:space="preserve">
     <value>Müşteri verileri eksik.</value>
   </data>
+  <data name="Success" xml:space="preserve">
+    <value>Başarılı.</value>
+  </data>
   <data name="TaskNotFound" xml:space="preserve">
     <value>Görev bulunamadı.</value>
   </data>
