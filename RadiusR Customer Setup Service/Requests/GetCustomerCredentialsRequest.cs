@@ -11,6 +11,7 @@ namespace RadiusR_Customer_Setup_Service.Requests
     [DataContract]
     public class TaskNoRequest : BaseRequest<long, SHA256>
     {
+        [DataMember]
         public long TaskNo
         {
             get

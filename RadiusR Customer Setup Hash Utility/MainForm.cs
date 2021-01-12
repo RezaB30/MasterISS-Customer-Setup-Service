@@ -23,15 +23,16 @@ namespace RadiusR_Customer_Setup_Hash_Utility
 
         private void GenerateButton_Click(object sender, EventArgs e)
         {
+            HashSaltTextbox.Text = Guid.NewGuid().ToString("N");
             var passwordHash = RawHashCheckbox.Checked ? PasswordTextbox.Text : GetHashString(PasswordTextbox.Text);
-            var generatedKey = GetHashString(passwordHash + KeyFragmentTextbox.Text);
+            var generatedKey = GetHashString(UsernameTextbox.Text + HashSaltTextbox.Text + passwordHash + KeyFragmentTextbox.Text);
             PasswordHashTextbox.Text = passwordHash;
             GeneratedKeyTextbox.Text = generatedKey;
         }
 
         private string GetHashString(string input)
         {
-            var algorithm = SHA1.Create();
+            var algorithm = SHA256.Create();
             return string.Join("", algorithm.ComputeHash(Encoding.UTF8.GetBytes(input)).Select(b => b.ToString("x2")));
         }
 
@@ -43,6 +44,11 @@ namespace RadiusR_Customer_Setup_Hash_Utility
         private void GeneratedKeyCopyButton_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(GeneratedKeyTextbox.Text);
+        }
+
+        private void HashSaltCopyButton_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(HashSaltTextbox.Text);
         }
 
         private void BrowseButton_Click(object sender, EventArgs e)

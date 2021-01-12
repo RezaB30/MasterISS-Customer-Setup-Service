@@ -12,6 +12,7 @@ namespace RadiusR_Customer_Setup_Service.Requests
     [DataContract]
     public class AddCustomerAttachmentRequest : BaseRequest<CustomerAttachment, SHA256>
     {
+        [DataMember]
         public CustomerAttachment CustomerAttachment
         {
             get

@@ -20,12 +20,12 @@ namespace RadiusR_Customer_Setup_Service.Requests.Parameters
         {
             get
             {
-                return ServiceTypeConverter.ParseDate(StartDate);
+                return ServiceTypeConverter.ParseDateTime(StartDate);
             }
             set
             {
                 if (value.HasValue)
-                    StartDate = ServiceTypeConverter.GetDateString(value.Value);
+                    StartDate = ServiceTypeConverter.GetDateTimeString(value.Value);
                 else
                     StartDate = null;
             }
@@ -35,12 +35,12 @@ namespace RadiusR_Customer_Setup_Service.Requests.Parameters
         {
             get
             {
-                return ServiceTypeConverter.ParseDate(EndDate);
+                return ServiceTypeConverter.ParseDateTime(EndDate);
             }
             set
             {
                 if (value.HasValue)
-                    EndDate = ServiceTypeConverter.GetDateString(value.Value);
+                    EndDate = ServiceTypeConverter.GetDateTimeString(value.Value);
                 else
                     EndDate = null;
             }

@@ -12,6 +12,7 @@ namespace RadiusR_Customer_Setup_Service.Requests
     [DataContract]
     public class AddTaskStatusUpdateRequest : BaseRequest<TaskUpdate, SHA256>
     {
+        [DataMember]
         public TaskUpdate TaskUpdate
         {
             get

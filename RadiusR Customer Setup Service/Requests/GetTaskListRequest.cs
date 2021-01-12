@@ -12,6 +12,7 @@ namespace RadiusR_Customer_Setup_Service.Requests
     [DataContract]
     public class GetTaskListRequest : BaseRequest<DateSpan, SHA256>
     {
+        [DataMember]
         public DateSpan DateSpan
         {
             get

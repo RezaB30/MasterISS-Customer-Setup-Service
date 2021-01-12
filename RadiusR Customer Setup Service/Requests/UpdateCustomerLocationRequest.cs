@@ -12,6 +12,7 @@ namespace RadiusR_Customer_Setup_Service.Requests
     [DataContract]
     public class UpdateCustomerLocationRequest : BaseRequest<LocationUpdate, SHA256>
     {
+        [DataMember]
         public LocationUpdate LocationUpdate
         {
             get
