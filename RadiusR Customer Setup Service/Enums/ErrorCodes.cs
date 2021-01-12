@@ -23,6 +23,7 @@ namespace RadiusR_Customer_Setup_Service.Enums
         InvalidFileType = 13,
         InvalidFileSize = 14,
         DescriptionIsTooLong = 15,
+        InvalidAttachmentType = 16,
 
         InternalServerError = 199
     }

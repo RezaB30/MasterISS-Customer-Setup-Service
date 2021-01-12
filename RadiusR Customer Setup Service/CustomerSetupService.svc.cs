@@ -533,6 +533,10 @@ namespace RadiusR_Customer_Setup_Service
                     {
                         return CommonResponse.UnchangeableTaskErrorResponse<ParameterlessResponse>(user.PasswordHash, request);
                     }
+                    if (!Enum.IsDefined(typeof(ClientAttachmentTypes), (int)request.CustomerAttachment.AttachmentType))
+                    {
+                        return CommonResponse.InvalidAttachmentTypeResponse<ParameterlessResponse>(user.PasswordHash, request);
+                    }
                     if (!FileConverter.IsFileTypeAcceptable(request.CustomerAttachment.FileType))
                     {
                         return CommonResponse.InvalidFileTypeResponse<ParameterlessResponse>(user.PasswordHash, request);
@@ -546,7 +550,7 @@ namespace RadiusR_Customer_Setup_Service
                     {
                         FileConverter.WriteToStream(tempStream, request.CustomerAttachment.FileData);
                         var fileManager = new MasterISSFileManager();
-                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(tempStream, ClientAttachmentTypes.Others, request.CustomerAttachment.FileType.ToLower()));
+                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(tempStream, (ClientAttachmentTypes)request.CustomerAttachment.AttachmentType, request.CustomerAttachment.FileType.ToLower()));
                         if (result.InternalException != null)
                         {
                             _logger.LogException(request.Username, result.InternalException);

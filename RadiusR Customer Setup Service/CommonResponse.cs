@@ -132,6 +132,18 @@ namespace RadiusR_Customer_Setup_Service
             return response;
         }
 
+        public static T InvalidAttachmentTypeResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
+        {
+            var response = (T)Activator.CreateInstance(typeof(T), new object[] { passwordHash, request });
+            response.ResponseMessage = new ServiceResponse()
+            {
+                ErrorCode = (int)ErrorCodes.InvalidAttachmentType,
+                ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("InvalidAttachmentType", CreateCulture(request.Culture))
+            };
+
+            return response;
+        }
+
         public static T InvalidTaskNoResponse<T>(string passwordHash, BaseRequest<SHA256> request) where T : BaseResponse<SHA256>
         {
             var response = (T)Activator.CreateInstance(typeof(T), new object[] { passwordHash, request });

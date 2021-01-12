@@ -97,6 +97,15 @@ namespace RadiusR_Customer_Setup_Service.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Attachment Type..
+        /// </summary>
+        public static string InvalidAttachmentType {
+            get {
+                return ResourceManager.GetString("InvalidAttachmentType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid fault code..
         /// </summary>
         public static string InvalidFaultCode {

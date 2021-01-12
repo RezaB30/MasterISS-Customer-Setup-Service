@@ -129,6 +129,9 @@
   <data name="InternalServerError" xml:space="preserve">
     <value>Internal server error.</value>
   </data>
+  <data name="InvalidAttachmentType" xml:space="preserve">
+    <value>Invalid Attachment Type.</value>
+  </data>
   <data name="InvalidFaultCode" xml:space="preserve">
     <value>Invalid fault code.</value>
   </data>

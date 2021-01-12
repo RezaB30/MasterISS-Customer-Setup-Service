@@ -13,6 +13,9 @@ namespace RadiusR_Customer_Setup_Service.Requests.Parameters
         public long TaskNo { get; set; }
 
         [DataMember]
+        public short AttachmentType { get; set; }
+
+        [DataMember]
         public string FileData { get; set; }
 
         [DataMember]

@@ -129,6 +129,9 @@
   <data name="InternalServerError" xml:space="preserve">
     <value>İç sunucu hatası.</value>
   </data>
+  <data name="InvalidAttachmentType" xml:space="preserve">
+    <value>Geçersiz dosya ek tipi.</value>
+  </data>
   <data name="InvalidFaultCode" xml:space="preserve">
     <value>Geçersiz arıza kodu.</value>
   </data>
