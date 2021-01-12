@@ -208,6 +208,7 @@
     <Compile Include="Authentication\Authenticator.cs" />
     <Compile Include="Authentication\UserIdentity.cs" />
     <Compile Include="CommonResponse.cs" />
+    <Compile Include="Responses\GetTaskDetailsResponse.cs" />
     <Compile Include="Responses\Parameters\CustomerContract.cs" />
     <Compile Include="Responses\Parameters\CustomerCredentials.cs" />
     <Compile Include="Responses\Parameters\CustomerLineDetails.cs" />

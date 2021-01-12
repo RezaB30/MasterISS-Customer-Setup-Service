@@ -37,6 +37,86 @@ namespace RadiusR_Customer_Setup_Service
             return KeyManager.GenerateKeyFragment(username, Properties.Settings.Default.CacheDuration);
         }
 
+        public GetTaskDetailsResponse GetTaskDetails(TaskNoRequest request)
+        {
+            try
+            {
+                _messageLogger.LogIncomingMessage(request);
+
+                var user = Authenticator.Authenticate(request);
+                if (user == null)
+                {
+                    return CommonResponse.UnauthorizedResponse<GetTaskDetailsResponse>(request);
+                }
+                using (RadiusREntities db = new RadiusREntities())
+                {
+                    var foundTask = db.CustomerSetupTasks.GetUserTasks(user.UserId)
+                        .Include(task => task.Subscription.SubscriptionTelekomInfo).Include(task => task.Subscription.Address).Include(task => task.CustomerSetupStatusUpdates).Include(task => task.Subscription.Customer)
+                        .Where(task => task.ID == request.TaskNo).FirstOrDefault();
+                    if (foundTask == null)
+                    {
+                        return CommonResponse.InvalidTaskNoResponse<GetTaskDetailsResponse>(user.PasswordHash, request);
+                    }
+
+                    var temp = new
+                    {
+                        TaskNo = foundTask.ID,
+                        Subscription = foundTask.Subscription,
+                        XDSLType = foundTask.XDSLType,
+                        HasModem = foundTask.HasModem,
+                        ModemName = foundTask.ModemName,
+                        ReservationDate = foundTask.CustomerSetupStatusUpdates.OrderByDescending(tu => tu.Date).Select(tu => tu.ReservationDate).FirstOrDefault(),
+                        TaskIssueDate = foundTask.TaskIssueDate,
+                        LastConnection = foundTask.Subscription.RadiusAccountings.OrderByDescending(ra => ra.StartTime).FirstOrDefault(),
+                        TaskStatus = foundTask.TaskStatus,
+                        TaskType = foundTask.TaskType,
+                        Details = foundTask.Details
+                    };
+
+                    var result = new SetupTask()
+                    {
+                        TaskNo = temp.TaskNo,
+                        SubscriberNo = temp.Subscription.SubscriberNo,
+                        BBK = temp.Subscription.Address.ApartmentID.ToString(),
+                        Province = temp.Subscription.Address.ProvinceName,
+                        City = temp.Subscription.Address.DistrictName,
+                        Address = temp.Subscription.Address.AddressText,
+                        XDSLNo = temp.Subscription.SubscriptionTelekomInfo != null ? temp.Subscription.SubscriptionTelekomInfo.SubscriptionNo : null,
+                        PSTN = temp.Subscription.SubscriptionTelekomInfo != null ? temp.Subscription.SubscriptionTelekomInfo.PSTN : null,
+                        XDSLType = temp.XDSLType,
+                        HasModem = temp.HasModem,
+                        ModemName = temp.ModemName,
+                        CustomerPhoneNo = temp.Subscription.Customer.ContactPhoneNo,
+                        ContactName = temp.Subscription.ValidDisplayName,
+                        ReservationDate = DataBinder.GetDateTimeString(temp.ReservationDate),
+                        TaskIssueDate = DataBinder.GetDateTimeString(temp.TaskIssueDate),
+                        LastConnectionDate = temp.LastConnection != null ? DataBinder.GetDateTimeString(temp.LastConnection.StartTime) : null,
+                        CustomerType = temp.Subscription.Customer.CustomerType,
+                        TaskType = temp.TaskType,
+                        TaskStatus = temp.TaskStatus,
+                        Details = temp.Details
+                    };
+
+                    _logger.LogInfo(request.Username, string.Empty);
+                    return new GetTaskDetailsResponse(user.PasswordHash, request)
+                    {
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
+                        },
+                        SetupTask = result
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogException(request.Username, ex);
+                return CommonResponse.InternalServerErrorResponse<GetTaskDetailsResponse>(request);
+            }
+            throw new NotImplementedException();
+        }
+
         public GetTaskListResponse GetTaskList(GetTaskListRequest request)
         {
             try

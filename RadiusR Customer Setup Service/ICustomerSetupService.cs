@@ -21,6 +21,9 @@ namespace RadiusR_Customer_Setup_Service
         GetTaskListResponse GetTaskList(GetTaskListRequest request);
 
         [OperationContract]
+        GetTaskDetailsResponse GetTaskDetails(TaskNoRequest request);
+
+        [OperationContract]
         GetCustomerCredentialResponse GetCustomerCredentials(TaskNoRequest request);
 
         [OperationContract]
