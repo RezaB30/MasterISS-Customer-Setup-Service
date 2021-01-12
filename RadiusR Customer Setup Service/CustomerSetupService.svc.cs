@@ -21,6 +21,7 @@ using RadiusR.DB.DomainsCache;
 using RadiusR.DB.ModelExtentions;
 using RadiusR.FileManagement;
 using RezaB.API.WebService;
+using RezaB.API.WebService.DataTypes;
 
 namespace RadiusR_Customer_Setup_Service
 {
@@ -88,9 +89,9 @@ namespace RadiusR_Customer_Setup_Service
                         ModemName = temp.ModemName,
                         CustomerPhoneNo = temp.Subscription.Customer.ContactPhoneNo,
                         ContactName = temp.Subscription.ValidDisplayName,
-                        ReservationDate = DataBinder.GetDateTimeString(temp.ReservationDate),
-                        TaskIssueDate = DataBinder.GetDateTimeString(temp.TaskIssueDate),
-                        LastConnectionDate = temp.LastConnection != null ? DataBinder.GetDateTimeString(temp.LastConnection.StartTime) : null,
+                        ReservationDate = ServiceTypeConverter.GetDateTimeString(temp.ReservationDate),
+                        TaskIssueDate = ServiceTypeConverter.GetDateTimeString(temp.TaskIssueDate),
+                        LastConnectionDate = temp.LastConnection != null ? ServiceTypeConverter.GetDateTimeString(temp.LastConnection.StartTime) : null,
                         CustomerType = temp.Subscription.Customer.CustomerType,
                         TaskType = temp.TaskType,
                         TaskStatus = temp.TaskStatus,
@@ -170,9 +171,9 @@ namespace RadiusR_Customer_Setup_Service
                         ModemName = task.ModemName,
                         CustomerPhoneNo = task.Subscription.Customer.ContactPhoneNo,
                         ContactName = task.Subscription.ValidDisplayName,
-                        ReservationDate = DataBinder.GetDateTimeString(task.ReservationDate),
-                        TaskIssueDate = DataBinder.GetDateTimeString(task.TaskIssueDate),
-                        LastConnectionDate = task.LastConnection != null ? DataBinder.GetDateTimeString(task.LastConnection.StartTime) : null,
+                        ReservationDate = ServiceTypeConverter.GetDateTimeString(task.ReservationDate),
+                        TaskIssueDate = ServiceTypeConverter.GetDateTimeString(task.TaskIssueDate),
+                        LastConnectionDate = task.LastConnection != null ? ServiceTypeConverter.GetDateTimeString(task.LastConnection.StartTime) : null,
                         CustomerType = task.Subscription.Customer.CustomerType,
                         TaskType = task.TaskType,
                         TaskStatus = task.TaskStatus,
@@ -362,7 +363,7 @@ namespace RadiusR_Customer_Setup_Service
                             NASIPAddress = firstSession.NASIP,
                             SessionId = firstSession.SessionID,
                             SessionTime = TimeSpan.FromSeconds(firstSession.SessionTime).ToString(@"dd\.hh\:mm\:ss"),
-                            SessionStart = DataBinder.GetDateTimeString(firstSession.StartTime),
+                            SessionStart = ServiceTypeConverter.GetDateTimeString(firstSession.StartTime),
                             IPAddress = firstSession.RadiusAccountingIPInfo != null ? firstSession.RadiusAccountingIPInfo.RealIP : null
                         }
                     };
@@ -415,7 +416,7 @@ namespace RadiusR_Customer_Setup_Service
                         Date = DateTime.Now,
                         Description = !string.IsNullOrWhiteSpace(request.TaskUpdate.Description) ? request.TaskUpdate.Description : null,
                         FaultCode = request.TaskUpdate.FaultCode,
-                        ReservationDate = request.TaskUpdate.ReservationDateParsed
+                        ReservationDate = request.TaskUpdate.FaultCode == (short)FaultCodes.RendezvousMade ? request.TaskUpdate.ReservationDateParsed : null
                     };
                     var newTaskStatus = CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.TaskUpdate.FaultCode);
                     var shouldSendActivationSMS = false;
