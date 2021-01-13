@@ -274,8 +274,8 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Content Include="User Manual\MasterISS Customer Setup Service V2.docx" />
-    <Content Include="User Manual\MasterISS Customer Setup Service V2.pdf" />
+    <None Include="User Manual\MasterISS Customer Setup Service V2.docx" />
+    <None Include="User Manual\MasterISS Customer Setup Service V2.pdf" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
