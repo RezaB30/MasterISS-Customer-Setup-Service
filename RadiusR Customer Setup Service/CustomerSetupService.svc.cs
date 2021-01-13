@@ -297,7 +297,8 @@ namespace RadiusR_Customer_Setup_Service
                             CurrentDownloadSpeed = response.Data.CurrentDown,
                             CurrentUploadSpeed = response.Data.CurrentUp,
                             DownloadSpeedCapacity = response.Data.MaxDown,
-                            UploadSpeedCapacity = response.Data.MaxUp
+                            UploadSpeedCapacity = response.Data.MaxUp,
+                            ShelfCardPort = "R" + response.Data.DSLAMNo + ".S" + response.Data.DSLAMNo + ".LT" + response.Data.CardNo + "." + response.Data.PortNo
                         }
                     };
                 }

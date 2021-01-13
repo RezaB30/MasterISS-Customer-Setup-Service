@@ -32,5 +32,8 @@ namespace RadiusR_Customer_Setup_Service.Responses.Parameters
 
         [DataMember]
         public string UploadSpeedCapacity { get; set; }
+
+        [DataMember]
+        public string ShelfCardPort { get; set; }
     }
 }
