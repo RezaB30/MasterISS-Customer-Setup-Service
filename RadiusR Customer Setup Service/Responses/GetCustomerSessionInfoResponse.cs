@@ -10,12 +10,12 @@ using System.Web;
 namespace RadiusR_Customer_Setup_Service.Responses
 {
     [DataContract]
-    public class GetCustomerSessionInfoResponse : BaseResponse<CustomerSessionInfo, SHA256>
+    public class GetCustomerSessionInfoResponse : BaseResponse<CustomerSessionBundle, SHA256>
     {
         public GetCustomerSessionInfoResponse(string passwordHash, BaseRequest<SHA256> baseRequest) : base(passwordHash, baseRequest) { }
 
         [DataMember]
-        public CustomerSessionInfo CustomerSessionInfo
+        public CustomerSessionBundle CustomerSessionBundle
         {
             get
             {

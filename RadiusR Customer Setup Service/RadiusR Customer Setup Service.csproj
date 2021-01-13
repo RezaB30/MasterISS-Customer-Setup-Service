@@ -212,6 +212,7 @@
     <Compile Include="Responses\Parameters\CustomerContract.cs" />
     <Compile Include="Responses\Parameters\CustomerCredentials.cs" />
     <Compile Include="Responses\Parameters\CustomerLineDetails.cs" />
+    <Compile Include="Responses\Parameters\CustomerSessionBundle.cs" />
     <Compile Include="Responses\Parameters\CustomerSessionInfo.cs" />
     <Compile Include="Responses\Parameters\SetupTask.cs" />
     <Compile Include="CustomConverter.cs" />

@@ -333,6 +333,7 @@ namespace RadiusR_Customer_Setup_Service
                     }
 
                     var firstSession = task.Subscription.RadiusAccountings.OrderBy(ra => ra.StartTime).FirstOrDefault();
+                    var lastSession = task.Subscription.RadiusAccountings.OrderByDescending(ra => ra.StartTime).FirstOrDefault();
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo);
                     if (firstSession == null)
                     {
@@ -343,9 +344,16 @@ namespace RadiusR_Customer_Setup_Service
                                 ErrorCode = (int)ErrorCodes.Success,
                                 ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
                             },
-                            CustomerSessionInfo = new CustomerSessionInfo()
+                            CustomerSessionBundle = new CustomerSessionBundle()
                             {
-                                IsOnline = false
+                                FirstSession = new CustomerSessionInfo()
+                                {
+                                    IsOnline = false
+                                },
+                                LastSession = new CustomerSessionInfo()
+                                {
+                                    IsOnline = false
+                                }
                             }
                         };
                     }
@@ -357,14 +365,26 @@ namespace RadiusR_Customer_Setup_Service
                             ErrorCode = (int)ErrorCodes.Success,
                             ErrorMessage = Localization.ErrorMessages.ResourceManager.GetString("Success", CommonResponse.CreateCulture(request.Culture))
                         },
-                        CustomerSessionInfo = new CustomerSessionInfo()
+                        CustomerSessionBundle = new CustomerSessionBundle()
                         {
-                            IsOnline = !firstSession.StopTime.HasValue,
-                            NASIPAddress = firstSession.NASIP,
-                            SessionId = firstSession.SessionID,
-                            SessionTime = TimeSpan.FromSeconds(firstSession.SessionTime).ToString(@"dd\.hh\:mm\:ss"),
-                            SessionStart = ServiceTypeConverter.GetDateTimeString(firstSession.StartTime),
-                            IPAddress = firstSession.RadiusAccountingIPInfo != null ? firstSession.RadiusAccountingIPInfo.RealIP : null
+                            FirstSession = new CustomerSessionInfo()
+                            {
+                                IsOnline = !firstSession.StopTime.HasValue,
+                                NASIPAddress = firstSession.NASIP,
+                                SessionId = firstSession.SessionID,
+                                SessionTime = TimeSpan.FromSeconds(firstSession.SessionTime).ToString(@"dd\.hh\:mm\:ss"),
+                                SessionStart = ServiceTypeConverter.GetDateTimeString(firstSession.StartTime),
+                                IPAddress = firstSession.RadiusAccountingIPInfo != null ? firstSession.RadiusAccountingIPInfo.RealIP : null
+                            },
+                            LastSession = lastSession != null ? new CustomerSessionInfo()
+                            {
+                                IsOnline = !lastSession.StopTime.HasValue,
+                                NASIPAddress = lastSession.NASIP,
+                                SessionId = lastSession.SessionID,
+                                SessionTime = TimeSpan.FromSeconds(lastSession.SessionTime).ToString(@"dd\.hh\:mm\:ss"),
+                                SessionStart = ServiceTypeConverter.GetDateTimeString(lastSession.StartTime),
+                                IPAddress = lastSession.RadiusAccountingIPInfo != null ? lastSession.RadiusAccountingIPInfo.RealIP : null
+                            } : null
                         }
                     };
                 }
