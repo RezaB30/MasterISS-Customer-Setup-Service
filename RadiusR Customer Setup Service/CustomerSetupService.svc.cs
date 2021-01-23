@@ -71,7 +71,14 @@ namespace RadiusR_Customer_Setup_Service
                         LastConnection = foundTask.Subscription.RadiusAccountings.OrderByDescending(ra => ra.StartTime).FirstOrDefault(),
                         TaskStatus = foundTask.TaskStatus,
                         TaskType = foundTask.TaskType,
-                        Details = foundTask.Details
+                        Details = foundTask.Details,
+                        TaskUpdates = foundTask.CustomerSetupStatusUpdates.OrderBy(cstu => cstu.Date).Select(cstu => new SavedTaskUpdate()
+                        {
+                            CreationDateParsed = cstu.Date,
+                            FaultCode = cstu.FaultCode,
+                            Description = cstu.Description,
+                            ReservationDateParsed = cstu.ReservationDate
+                        }).ToArray()
                     };
 
                     var result = new SetupTask()
@@ -95,7 +102,8 @@ namespace RadiusR_Customer_Setup_Service
                         CustomerType = temp.Subscription.Customer.CustomerType,
                         TaskType = temp.TaskType,
                         TaskStatus = temp.TaskStatus,
-                        Details = temp.Details
+                        Details = temp.Details,
+                        TaskUpdates = temp.TaskUpdates
                     };
 
                     _logger.LogInfo(request.Username, string.Empty);

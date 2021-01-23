@@ -214,6 +214,7 @@
     <Compile Include="Responses\Parameters\CustomerLineDetails.cs" />
     <Compile Include="Responses\Parameters\CustomerSessionBundle.cs" />
     <Compile Include="Responses\Parameters\CustomerSessionInfo.cs" />
+    <Compile Include="Responses\Parameters\SavedTaskUpdate.cs" />
     <Compile Include="Responses\Parameters\SetupTask.cs" />
     <Compile Include="CustomConverter.cs" />
     <Compile Include="CustomerSetupService.svc.cs">
@@ -242,7 +243,7 @@
     </Compile>
     <Compile Include="Requests\AddCustomerAttachmentRequest.cs" />
     <Compile Include="Requests\AddTaskStatusUpdateRequest.cs" />
-    <Compile Include="Requests\GetCustomerCredentialsRequest.cs" />
+    <Compile Include="Requests\TaskNoRequest.cs" />
     <Compile Include="Requests\GetTaskListRequest.cs" />
     <Compile Include="Requests\Parameters\CustomerAttachment.cs" />
     <Compile Include="Requests\Parameters\DateSpan.cs" />

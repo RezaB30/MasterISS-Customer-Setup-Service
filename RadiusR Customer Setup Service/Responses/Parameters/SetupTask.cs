@@ -71,5 +71,8 @@ namespace RadiusR_Customer_Setup_Service.Responses.Parameters
 
         [DataMember]
         public string Details { get; set; }
+
+        [DataMember]
+        public SavedTaskUpdate[] TaskUpdates { get; set; }
     }
 }
