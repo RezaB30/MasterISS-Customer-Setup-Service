@@ -609,7 +609,7 @@ namespace RadiusR_Customer_Setup_Service
             catch (Exception ex)
             {
                 _logger.LogException(request.Username, ex);
-                return CommonResponse.InternalServerErrorResponse<ParameterlessResponse>(request);
+                return CommonResponse.InternalServerErrorResponse<AddCustomerAttachmentResponse>(request);
             }
         }
 
