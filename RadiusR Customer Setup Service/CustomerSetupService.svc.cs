@@ -541,7 +541,7 @@ namespace RadiusR_Customer_Setup_Service
             }
         }
 
-        public ParameterlessResponse AddCustomerAttachment(AddCustomerAttachmentRequest request)
+        public AddCustomerAttachmentResponse AddCustomerAttachment(AddCustomerAttachmentRequest request)
         {
             try
             {
@@ -550,47 +550,54 @@ namespace RadiusR_Customer_Setup_Service
                 var user = Authenticator.Authenticate(request);
                 if (user == null)
                 {
-                    return CommonResponse.UnauthorizedResponse<ParameterlessResponse>(request);
+                    return CommonResponse.UnauthorizedResponse<AddCustomerAttachmentResponse>(request);
                 }
                 using (RadiusREntities db = new RadiusREntities())
                 {
                     var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.CustomerAttachment.TaskNo);
                     if (task == null)
                     {
-                        return CommonResponse.InvalidTaskNoResponse<ParameterlessResponse>(user.PasswordHash, request);
+                        return CommonResponse.InvalidTaskNoResponse<AddCustomerAttachmentResponse>(user.PasswordHash, request);
                     }
                     if (!task.CanBeUpdated())
                     {
-                        return CommonResponse.UnchangeableTaskErrorResponse<ParameterlessResponse>(user.PasswordHash, request);
+                        return CommonResponse.UnchangeableTaskErrorResponse<AddCustomerAttachmentResponse>(user.PasswordHash, request);
                     }
                     if (!Enum.IsDefined(typeof(ClientAttachmentTypes), (int)request.CustomerAttachment.AttachmentType))
                     {
-                        return CommonResponse.InvalidAttachmentTypeResponse<ParameterlessResponse>(user.PasswordHash, request);
+                        return CommonResponse.InvalidAttachmentTypeResponse<AddCustomerAttachmentResponse>(user.PasswordHash, request);
                     }
                     if (!FileConverter.IsFileTypeAcceptable(request.CustomerAttachment.FileType))
                     {
-                        return CommonResponse.InvalidFileTypeResponse<ParameterlessResponse>(user.PasswordHash, request);
+                        return CommonResponse.InvalidFileTypeResponse<AddCustomerAttachmentResponse>(user.PasswordHash, request);
                     }
                     if (!FileConverter.IsFileSizeAcceptable(request.CustomerAttachment.FileData))
                     {
-                        return CommonResponse.InvalidFileSizeResponse<ParameterlessResponse>(user.PasswordHash, request);
+                        return CommonResponse.InvalidFileSizeResponse<AddCustomerAttachmentResponse>(user.PasswordHash, request);
                     }
 
+                    string addedattachmentHash;
                     using (Stream tempStream = new MemoryStream())
                     {
                         FileConverter.WriteToStream(tempStream, request.CustomerAttachment.FileData);
                         var fileManager = new MasterISSFileManager();
-                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(tempStream, (ClientAttachmentTypes)request.CustomerAttachment.AttachmentType, request.CustomerAttachment.FileType.ToLower()));
+                        var attachment = new FileManagerClientAttachmentWithContent(tempStream, (ClientAttachmentTypes)request.CustomerAttachment.AttachmentType, request.CustomerAttachment.FileType.ToLower());
+                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, attachment);
                         if (result.InternalException != null)
                         {
                             _logger.LogException(request.Username, result.InternalException);
-                            return CommonResponse.InternalServerErrorResponse<ParameterlessResponse>(request);
+                            return CommonResponse.InternalServerErrorResponse<AddCustomerAttachmentResponse>(request);
                         }
+                        addedattachmentHash = attachment.MD5;
                     }
 
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo, "Added attachment.");
-                    return new ParameterlessResponse(user.PasswordHash, request)
+                    return new AddCustomerAttachmentResponse(user.PasswordHash, request)
                     {
+                        AddedAttachment = new FileMD5Hash()
+                        {
+                            MD5Hash = addedattachmentHash
+                        },
                         ResponseMessage = new ServiceResponse()
                         {
                             ErrorCode = (int)ErrorCodes.Success,
@@ -648,6 +655,50 @@ namespace RadiusR_Customer_Setup_Service
             {
                 _logger.LogException(request.Username, ex);
                 return CommonResponse.InternalServerErrorResponse<GetCustomerContractResponse>(request);
+            }
+        }
+
+        public GetCustomerAttachmentsResponse GetCustomerAttachments(TaskNoRequest request)
+        {
+            try
+            {
+                _messageLogger.LogIncomingMessage(request);
+
+                var user = Authenticator.Authenticate(request);
+                if (user == null)
+                {
+                    return CommonResponse.UnauthorizedResponse<GetCustomerAttachmentsResponse>(request);
+                }
+                using (RadiusREntities db = new RadiusREntities())
+                {
+                    var task = db.CustomerSetupTasks.GetUserTasks(user.UserId).FirstOrDefault(t => t.ID == request.TaskNo);
+                    if (task == null)
+                    {
+                        return CommonResponse.InvalidTaskNoResponse<GetCustomerAttachmentsResponse>(user.PasswordHash, request);
+                    }
+                    var fileManager = new MasterISSFileManager();
+                    var result = fileManager.GetClientAttachmentsList(task.SubscriptionID);
+                    if (result.InternalException != null)
+                    {
+                        _logger.LogException(request.Username, result.InternalException);
+                        return CommonResponse.InternalServerErrorResponse<GetCustomerAttachmentsResponse>(request);
+                    }
+                    _logger.LogInfo(request.Username, task.Subscription.SubscriberNo, "Sent client attachment list.");
+                    return new GetCustomerAttachmentsResponse(user.PasswordHash, request)
+                    {
+                        AttachmentList = result.Result.Select(att => new FileMD5Hash() { MD5Hash = att.MD5 }).ToList(),
+                        ResponseMessage = new ServiceResponse()
+                        {
+                            ErrorCode = (int)ErrorCodes.Success,
+                            ErrorMessage = Localization.ErrorMessages.Success
+                        }
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogException(request.Username, ex);
+                return CommonResponse.InternalServerErrorResponse<GetCustomerAttachmentsResponse>(request);
             }
         }
     }

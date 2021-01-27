@@ -39,9 +39,12 @@ namespace RadiusR_Customer_Setup_Service
         ParameterlessResponse UpdateClientLocation(UpdateCustomerLocationRequest request);
 
         [OperationContract]
-        ParameterlessResponse AddCustomerAttachment(AddCustomerAttachmentRequest request);
+        AddCustomerAttachmentResponse AddCustomerAttachment(AddCustomerAttachmentRequest request);
 
         [OperationContract]
         GetCustomerContractResponse GetCustomerContract(TaskNoRequest request);
+
+        [OperationContract]
+        GetCustomerAttachmentsResponse GetCustomerAttachments(TaskNoRequest request);
     }
 }
