@@ -9,6 +9,7 @@ using System.Text;
 using RadiusR_Customer_Setup_Service.Requests;
 using RadiusR_Customer_Setup_Service.Responses;
 using RadiusR.DB;
+using RadiusR.DB.Utilities.Extentions;
 using RadiusR_Customer_Setup_Service.Enums;
 using RadiusR_Customer_Setup_Service.Responses.Parameters;
 using System.Data.Entity;
@@ -449,13 +450,24 @@ namespace RadiusR_Customer_Setup_Service
                     };
                     var newTaskStatus = CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.TaskUpdate.FaultCode);
                     var shouldSendActivationSMS = false;
+                    // completed
                     if (newTaskStatus == TaskStatuses.Completed && (short)newTaskStatus != task.TaskStatus)
                     {
                         shouldSendActivationSMS = true;
+                        task.CompleteCustomerSetupTask();
                         task.Subscription.State = (short)RadiusR.DB.Enums.CustomerState.Active;
                     }
-                    task.TaskStatus = (short)CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.TaskUpdate.FaultCode);
-                    task.CompletionDate = CustomConverter.GetCompletionDate((TaskStatuses)task.TaskStatus);
+                    // cancelled
+                    else if (newTaskStatus == TaskStatuses.Cancelled)
+                    {
+                        task.CancelCustomerSetupTask();
+                    }
+                    // continues
+                    else
+                    {
+                        task.TaskStatus = (short)CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.TaskUpdate.FaultCode);
+                    }
+                    //task.CompletionDate = CustomConverter.GetCompletionDate((TaskStatuses)task.TaskStatus);
                     task.CustomerSetupStatusUpdates.Add(statusUpdate);
                     db.SaveChanges();
 

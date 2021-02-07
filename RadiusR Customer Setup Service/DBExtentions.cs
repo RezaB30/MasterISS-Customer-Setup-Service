@@ -10,39 +10,40 @@ namespace RadiusR_Customer_Setup_Service
 {
     public static class DBExtentions
     {
-        private static short[] UpdatableStatuses = new[]{
-            (short)TaskStatuses.New,
-            (short)TaskStatuses.InProgress,
-            (short)TaskStatuses.Halted
-            };
+        //private static short[] UpdatableStatuses = new[]{
+        //    (short)TaskStatuses.New,
+        //    (short)TaskStatuses.InProgress,
+        //    (short)TaskStatuses.Halted
+        //    };
         public static IQueryable<CustomerSetupTask> GetUserTasks(this IQueryable<CustomerSetupTask> tasks, int userId)
         {
-            return tasks.Where(task => task.SetupUserID == userId);
+            var threshold = DateTime.Today.AddDays(-5);
+            return tasks.Where(task => task.SetupUserID == userId && ((task.TaskStatus != (short)TaskStatuses.Completed && task.TaskStatus != (short)TaskStatuses.Cancelled) || task.CompletionDate > threshold));
         }
 
         public static bool CanBeUpdated(this CustomerSetupTask task)
         {
-            return true;
+            return task.TaskStatus != (short)TaskStatuses.Completed && task.TaskStatus != (short)TaskStatuses.Cancelled;
             // fuck argeset -- removed all checks.
-            var compareDate = DateTime.Now.AddDays(30);
-            var firstCompleted = GetFirstCompleted(task);
-            return UpdatableStatuses.Contains(task.TaskStatus) || firstCompleted == null || firstCompleted.Date < compareDate;
+            //var compareDate = DateTime.Now.AddDays(30);
+            //var firstCompleted = GetFirstCompleted(task);
+            //return UpdatableStatuses.Contains(task.TaskStatus) || firstCompleted == null || firstCompleted.Date < compareDate;
         }
 
         public static bool CanChangeState(this CustomerSetupTask task, FaultCodes newFaultCode)
         {
-            return true;
+            return task.TaskStatus != (short)TaskStatuses.Completed && task.TaskStatus != (short)TaskStatuses.Cancelled;
             // fuck argeset -- removed all checks.
-            var compareDate = DateTime.Now.AddDays(30);
-            var firstCompleted = GetFirstCompleted(task);
-            if ((firstCompleted == null || firstCompleted.Date < compareDate) && task.TaskStatus == (short)CustomConverter.GetFaultCodeTaskStatus(newFaultCode))
-                return true;
-            return UpdatableStatuses.Contains(task.TaskStatus);
+            //var compareDate = DateTime.Now.AddDays(30);
+            //var firstCompleted = GetFirstCompleted(task);
+            //if ((firstCompleted == null || firstCompleted.Date < compareDate) && task.TaskStatus == (short)CustomConverter.GetFaultCodeTaskStatus(newFaultCode))
+            //    return true;
+            //return UpdatableStatuses.Contains(task.TaskStatus);
         }
 
-        private static CustomerSetupStatusUpdate GetFirstCompleted(CustomerSetupTask task)
-        {
-            return task.CustomerSetupStatusUpdates.OrderBy(update => update.Date).FirstOrDefault(update => update.FaultCode == (short)FaultCodes.SetupComplete);
-        }
+        //private static CustomerSetupStatusUpdate GetFirstCompleted(CustomerSetupTask task)
+        //{
+        //    return task.CustomerSetupStatusUpdates.OrderBy(update => update.Date).FirstOrDefault(update => update.FaultCode == (short)FaultCodes.SetupComplete);
+        //}
     }
 }
