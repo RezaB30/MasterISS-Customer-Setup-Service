@@ -449,13 +449,13 @@ namespace RadiusR_Customer_Setup_Service
                         ReservationDate = request.TaskUpdate.FaultCode == (short)FaultCodes.RendezvousMade ? request.TaskUpdate.ReservationDateParsed : null
                     };
                     var newTaskStatus = CustomConverter.GetFaultCodeTaskStatus((FaultCodes)request.TaskUpdate.FaultCode);
-                    var shouldSendActivationSMS = false;
+                    //var shouldSendActivationSMS = false;
                     // completed
                     if (newTaskStatus == TaskStatuses.Completed && (short)newTaskStatus != task.TaskStatus)
                     {
-                        shouldSendActivationSMS = true;
+                        //shouldSendActivationSMS = true;
                         task.CompleteCustomerSetupTask();
-                        task.Subscription.State = (short)RadiusR.DB.Enums.CustomerState.Active;
+                        //task.Subscription.State = (short)RadiusR.DB.Enums.CustomerState.Active;
                     }
                     // cancelled
                     else if (newTaskStatus == TaskStatuses.Cancelled)
@@ -471,12 +471,12 @@ namespace RadiusR_Customer_Setup_Service
                     task.CustomerSetupStatusUpdates.Add(statusUpdate);
                     db.SaveChanges();
 
-                    if (shouldSendActivationSMS)
-                    {
-                        var SMSService = new RadiusR.SMS.SMSService();
-                        db.SMSArchives.AddSafely(SMSService.SendSubscriberSMS(task.Subscription, RadiusR.DB.Enums.SMSType.Activation));
-                        db.SaveChanges();
-                    }
+                    //if (shouldSendActivationSMS)
+                    //{
+                    //    var SMSService = new RadiusR.SMS.SMSService();
+                    //    db.SMSArchives.AddSafely(SMSService.SendSubscriberSMS(task.Subscription, RadiusR.DB.Enums.SMSType.Activation));
+                    //    db.SaveChanges();
+                    //}
 
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo, "Added rendezvous [ID = {0}].", statusUpdate.ID);
                     return new ParameterlessResponse(user.PasswordHash, request)
