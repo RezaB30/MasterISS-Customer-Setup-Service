@@ -20,6 +20,7 @@ using RadiusR.PDFForms;
 using RadiusR.DB.DomainsCache;
 using RadiusR.DB.ModelExtentions;
 using RadiusR.FileManagement;
+using RadiusR.FileManagement.SpecialFiles;
 
 namespace RadiusR_Customer_Setup_Service
 {
@@ -140,8 +141,8 @@ namespace RadiusR_Customer_Setup_Service
                     return new GetCustomerCredentialResponse()
                     {
                         ErrorCode = (int)ErrorCodes.Success,
-                        Username = task.Subscription.Username,
-                        Password = task.Subscription.RadiusPassword
+                        Username = task.Subscription.RadiusAuthorization.Username,
+                        Password = task.Subscription.RadiusAuthorization.Password
                     };
                 }
             }
@@ -425,7 +426,7 @@ namespace RadiusR_Customer_Setup_Service
                     {
                         FileConverter.WriteToStream(tempStream, request.FileData);
                         var fileManager = new MasterISSFileManager();
-                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(tempStream, ClientAttachmentTypes.Others, request.FileType.ToLower()));
+                        var result = fileManager.SaveClientAttachment(task.SubscriptionID, new FileManagerClientAttachmentWithContent(tempStream, new FileManagerClientAttachment(ClientAttachmentTypes.Others, request.FileType.ToLower())));
                         if (result.InternalException != null)
                         {
                             _logger.LogException(request.Username, result.InternalException);
