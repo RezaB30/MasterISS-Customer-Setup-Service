@@ -23,6 +23,7 @@ using RadiusR.DB.ModelExtentions;
 using RadiusR.FileManagement;
 using RezaB.API.WebService;
 using RezaB.API.WebService.DataTypes;
+using RadiusR.FileManagement.SpecialFiles;
 
 namespace RadiusR_Customer_Setup_Service
 {
@@ -241,8 +242,8 @@ namespace RadiusR_Customer_Setup_Service
                         },
                         CustomerCredentials = new CustomerCredentials()
                         {
-                            Username = task.Subscription.Username,
-                            Password = task.Subscription.RadiusPassword
+                            Username = task.Subscription.RadiusAuthorization.Username,
+                            Password = task.Subscription.RadiusAuthorization.Password
                         }
                     };
                 }
@@ -593,14 +594,14 @@ namespace RadiusR_Customer_Setup_Service
                     {
                         FileConverter.WriteToStream(tempStream, request.CustomerAttachment.FileData);
                         var fileManager = new MasterISSFileManager();
-                        var attachment = new FileManagerClientAttachmentWithContent(tempStream, (ClientAttachmentTypes)request.CustomerAttachment.AttachmentType, request.CustomerAttachment.FileType.ToLower());
+                        var attachment = new FileManagerClientAttachmentWithContent(tempStream, new FileManagerClientAttachment((ClientAttachmentTypes)request.CustomerAttachment.AttachmentType, request.CustomerAttachment.FileType.ToLower()));
                         var result = fileManager.SaveClientAttachment(task.SubscriptionID, attachment);
                         if (result.InternalException != null)
                         {
                             _logger.LogException(request.Username, result.InternalException);
                             return CommonResponse.InternalServerErrorResponse<AddCustomerAttachmentResponse>(request);
                         }
-                        addedattachmentHash = attachment.MD5;
+                        addedattachmentHash = attachment.FileDetail.MD5;
                     }
 
                     _logger.LogInfo(request.Username, task.Subscription.SubscriberNo, "Added attachment.");
